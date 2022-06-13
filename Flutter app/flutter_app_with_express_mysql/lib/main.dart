@@ -73,12 +73,23 @@ class _MyHomePageState extends State<MyHomePage> {
                       itemBuilder: (context, index) {
                         return ListTile(
                           title: Text(snapshot.data![index]['text']),
-                          // trailing: Row(
-                          //   children: [
-                          //     IconButton(
-                          //         onPressed: () {}, icon: Icon(Icons.edit))
-                          //   ],
-                          // ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                  onPressed: () {}, icon: Icon(Icons.edit)),
+                              IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      deleteData(snapshot.data![index]['id']);
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ))
+                            ],
+                          ),
                         );
                       },
                       itemCount: snapshot.data!.length,
@@ -130,4 +141,9 @@ Future<List<dynamic>> getData() async {
 putData(String text) async {
   await http.post(Uri.parse('http://172.20.10.3:3000/addtodo'),
       body: {'text': text, 'done': '0'});
+}
+
+deleteData(int id) async {
+  await http
+      .delete(Uri.parse('http://172.20.10.3:3000/deletetodo/' + id.toString()));
 }

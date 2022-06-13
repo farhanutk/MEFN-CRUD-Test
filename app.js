@@ -50,6 +50,17 @@ app.post('/addtodo',(req,res)=>{
   })
 })
 
+app.delete('/deletetodo/:id',(req,res)=>{
+  const sql = 'DELETE FROM todos WHERE id = ?'
+  connection.query(sql,[req.params.id],(err,data)=>{
+    if(err){
+      res.send("Error"+ err)
+    }else{
+      res.send('Deleted')
+    }
+  })
+})
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
