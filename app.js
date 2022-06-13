@@ -32,9 +32,7 @@ app.get('/', (req, res) => {
       res.send("Error")
     }else{
       const result = JSON.parse(JSON.stringify(data))
-      console.log(result)
-
-      res.json(result)
+        res.json(result)
     }
   })
 })
@@ -57,6 +55,18 @@ app.delete('/deletetodo/:id',(req,res)=>{
       res.send("Error"+ err)
     }else{
       res.send('Deleted')
+    }
+  })
+})
+
+app.put('/updatetodo',(req,res)=>{
+  const {text,id}=req.body
+  const sql = `UPDATE todos SET text = ? WHERE id = ?`
+  connection.query(sql,[text,id],(err,data)=>{
+    if(err){
+      res.send("Error"+ err)
+    }else{
+      res.send('Updated')
     }
   })
 })

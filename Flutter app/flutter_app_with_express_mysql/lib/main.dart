@@ -30,6 +30,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController textController = TextEditingController();
+  late TextEditingController editTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -58,16 +59,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       setState(() {
                         putData(textController.text);
                         textController.clear();
+                        FocusScope.of(context).unfocus();
                       });
                     },
                     icon: Icon(Icons.add),
-                    label: Text('Add new TODO')),
+                    label: Text('Add TODO')),
               ]),
             )),
             FutureBuilder<List<dynamic>>(
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  print(snapshot.data);
                   return Expanded(
                     child: (ListView.builder(
                       itemBuilder: (context, index) {
@@ -77,7 +78,39 @@ class _MyHomePageState extends State<MyHomePage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                  onPressed: () {}, icon: Icon(Icons.edit)),
+                                  onPressed: () {
+                                    editTextController.text =
+                                        snapshot.data![index]['text'];
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                              title: Text("Edit TODO"),
+                                              content: TextFormField(
+                                                autofocus: true,
+                                                decoration:
+                                                    const InputDecoration(
+                                                  labelText: 'TODO',
+                                                ),
+                                                controller: editTextController,
+                                              ),
+                                              actions: [
+                                                ElevatedButton(
+                                                    onPressed: () {
+                                                      setState(() {
+                                                        updateData(
+                                                            snapshot.data![
+                                                                index]['id'],
+                                                            editTextController
+                                                                .text);
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      });
+                                                    },
+                                                    child: Text('Save changes'))
+                                              ],
+                                            ));
+                                  },
+                                  icon: Icon(Icons.edit)),
                               IconButton(
                                   onPressed: () {
                                     setState(() {
@@ -106,35 +139,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-// class Todo {
-//   final int id;
-//   final String text;
-//   final int done;
-
-//   const Todo({
-//     required this.id,
-//     required this.text,
-//     required this.done,
-//   });
-
-//   factory Todo.fromJson(List json) {
-//     return Todo(
-//       id: json[0]['id'],
-//       text: json[0]['text'],
-//       done: json[0]['done'],
-//     );
-//   }
-// }
-
 Future<List<dynamic>> getData() async {
   final response = await http.get(Uri.parse('http://172.20.10.3:3000/'));
-  // final response =
-  // await http.get(Uri.parse('https://jsonplaceholder.typicode.com/todos/1'));
-  // print(response.body);
   final List data = await jsonDecode(response.body.toString());
-  // final dataObj = Todo.fromJson(data);
-  // print(dataObj);
-  // print(dataObj.text);
   return data;
 }
 
@@ -146,4 +153,9 @@ putData(String text) async {
 deleteData(int id) async {
   await http
       .delete(Uri.parse('http://172.20.10.3:3000/deletetodo/' + id.toString()));
+}
+
+updateData(int id, String text) async {
+  await http.put(Uri.parse('http://172.20.10.3:3000/updatetodo'),
+      body: {'id': '$id', 'text': text});
 }
