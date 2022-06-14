@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -73,7 +75,21 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: (ListView.builder(
                       itemBuilder: (context, index) {
                         return ListTile(
-                          title: Text(snapshot.data![index]['text']),
+                          leading: Checkbox(
+                            onChanged: (value) {
+                              setState(() {
+                                checkTodo(snapshot.data![index]['id'], value!);
+                              });
+                            },
+                            value: snapshot.data![index]['done'] != 0,
+                          ),
+                          title: Text(
+                            snapshot.data![index]['text'],
+                            style: TextStyle(
+                                decoration: snapshot.data![index]['done'] == 1
+                                    ? TextDecoration.lineThrough
+                                    : null),
+                          ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -158,4 +174,10 @@ deleteData(int id) async {
 updateData(int id, String text) async {
   await http.put(Uri.parse('http://172.20.10.3:3000/updatetodo'),
       body: {'id': '$id', 'text': text});
+}
+
+checkTodo(int id, bool value) async {
+  int done = value ? 1 : 0;
+  await http.put(Uri.parse('http://172.20.10.3:3000/checktodo'),
+      body: {'id': '$id', 'done': '$done'});
 }

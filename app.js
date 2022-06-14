@@ -71,6 +71,18 @@ app.put('/updatetodo',(req,res)=>{
   })
 })
 
+app.put('/checktodo',(req,res)=>{
+  const {done,id}=req.body
+  const sql = `UPDATE todos SET done = ? WHERE id = ?`
+  connection.query(sql,[done,id],(err,data)=>{
+    if(err){
+      res.send("Error"+ err)
+    }else{
+      res.send('Check worked')
+    }
+  })
+})
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
